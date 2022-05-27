@@ -3,6 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -55,6 +56,8 @@ async function run() {
         }
     }
 
+
+
     app.put('/user/:email', async (req, res) => {
         const email = req.params.email;
         const user = req.body;
@@ -67,6 +70,14 @@ async function run() {
         const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3d' })
         res.send({ result, token });
       });
+
+      //
+      app.get('/api/admin',verifyAdmin, async (req, res) => {
+        const email = req.query.email
+        const result = await admins.findOne({ email });
+        res.send(result);
+    })
+
     //make admin
     app.put('/api/admin',  async (req, res) => {
         const email = req.body.email;
@@ -91,6 +102,50 @@ async function run() {
     app.get("/toolsall", async (req, res) => {
         const tools = await productCollection.find().toArray();
         res.send(tools);
+    });
+
+
+    //payment update
+    app.patch('/api/order/:id',  async (req, res) => {
+        const id = req.params.id;
+        const payment = req.body;
+        const filter = { _id: ObjectId(id) };
+        const updatedDoc = {
+            $set: {
+                paid: true,
+                transactionId: payment.transactionId
+            }
+        }
+        const updatedBooking = await orders.updateOne(filter, updatedDoc);
+        res.send(updatedBooking);
+    })
+
+
+    //payment post
+    app.post('/create-payment-intent', async (req, res) => {
+        const price = req.body.pay;
+        if (price < 999999) {
+            const amount = price * 100;
+            if (amount) {
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: amount,
+                    currency: 'usd',
+                    payment_method_types: ['card']
+                });
+                if (paymentIntent.client_secret) {
+                    return res.send({ clientSecret: paymentIntent.client_secret });
+                } else {
+                    return res.send({ clientSecret: '' })
+                }
+
+            } else {
+                return res.send({ clientSecret: '' })
+            }
+
+        } else {
+            return res.send({ clientSecret: '' })
+        }
+
     });
     //API to get all to manage
     app.get("/toolsallmanage", async (req, res) => {
