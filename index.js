@@ -72,7 +72,7 @@ async function run() {
       });
 
       //
-      app.get('/api/admin',verifyAdmin, async (req, res) => {
+      app.get('/api/admin', async (req, res) => {
         const email = req.query.email
         const result = await admins.findOne({ email });
         res.send(result);
