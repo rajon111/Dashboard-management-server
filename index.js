@@ -288,6 +288,23 @@ app.get('/api/order/:id',async (req, res) => {
     res.send(result);
 })
 
+app.patch('/api/products/:id', async (req, res) => {
+    const id = req.params.id;
+    const product = req.body;
+    const filter = { _id: ObjectId(id) };
+    const options = { upsert: true };
+    const updateDoc = {
+        $set: product,
+    };
+    const productData = await productCollection.findOne(filter);
+    if (productData) {
+        const result = await productCollection.updateOne(filter, updateDoc, options);
+        return res.send(result);
+    }
+
+    return res.send({ message: 'Product not found' });
+})
+
 
 
 
