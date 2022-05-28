@@ -15,5 +15,19 @@ LIVE LINK: https://assignment-12-2b6d5.web.app/
 * Product Order And User Profile Update
 * And many more...
 
+## Technology Uses
 
+* Stripe
+* Javascript ES-6
+* React
+* Node
+* MongoDB
+* Express
+* Tailwind
+* DaisyUI
+* Flowbite
+* Firebase
+* React Hook Form
+* Ract Query
+* And Many More...
  
