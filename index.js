@@ -360,6 +360,26 @@ app.patch('/api/products/:id', async (req, res) => {
     return res.send({ message: 'Product not found' });
 })
 
+//order shipped
+
+app.patch('/api/orders/shipped/:id',async (req, res) => {
+    const id = req.params.id;
+    // console.log(id)
+    
+    const filter = { _id: ObjectId(id) };
+    const updatedDoc = {
+        $set: {
+            status: 'shipped'
+        }
+         
+    }
+    const product = await orders.findOne(filter)
+    // console.log(product)
+    const updatedBooking = await orders.updateOne(filter, updatedDoc);
+
+    res.send(updatedBooking);
+})
+
 
 
 
